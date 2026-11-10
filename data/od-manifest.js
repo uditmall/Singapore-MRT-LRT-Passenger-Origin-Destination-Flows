@@ -1,1 +1,1 @@
-window.OD=window.OD||{};OD.manifest=[{"id": "2026-07", "label": "July 2026", "accessed": "2026-10-07"}, {"id": "2026-08", "label": "August 2026", "accessed": "2026-10-03"}, {"id": "2026-09", "label": "September 2026", "accessed": "2026-11-02"}];
+window.OD=window.OD||{};OD.manifest=[{"id": "2026-07", "label": "July 2026", "accessed": "2026-10-07"}, {"id": "2026-08", "label": "August 2026", "accessed": "2026-10-03"}, {"id": "2026-09", "label": "September 2026", "accessed": "2026-11-02"}, {"id": "2026-10", "label": "October 2026", "accessed": "2026-11-10"}];
