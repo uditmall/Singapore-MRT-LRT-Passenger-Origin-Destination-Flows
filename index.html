@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Singapore MRT &amp; LRT origin-destination flows</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <canvas id="cv" role="img" aria-label="Map of Singapore MRT and LRT stations with trip flows between stations"></canvas>
+
+  <div id="tl">
+    <div class="ov" id="title">
+      <h1 id="h1"></h1>
+      <p id="monthLbl"></p>
+    </div>
+    <div class="ov" id="meth" hidden>
+      <button class="hb" id="methBtn" aria-expanded="false" aria-controls="methBody"><span>Methodology of Passenger load between stations</span><span class="car">&#9662;</span></button>
+      <div id="methBody" hidden></div>
+    </div>
+    <div class="ov" id="zoom"><button class="ib" id="zin" aria-label="Zoom in">+</button><button class="ib" id="zout" aria-label="Zoom out">&minus;</button><button class="ib" id="zreset" aria-label="Reset view" style="font-size:14px">&#8634;</button></div>
+  </div>
+
+  <nav class="ov seg" id="views" aria-label="Views">
+    <button data-v="flow" aria-pressed="true">OD flow map</button>
+    <button data-v="load" aria-pressed="false">Passenger load between stations</button>
+    <button data-v="cor" aria-pressed="false">Top corridors</button>
+    <button data-v="mx" aria-pressed="false">Line to line</button>
+    <button data-v="wk" aria-pressed="false">Weekday vs weekend</button>
+  </nav>
+
+  <div id="rt">
+    <div id="rtGrip" class="grip v" role="separator" aria-orientation="vertical" aria-label="Drag to resize the side panels (double-click to reset)" tabindex="0"></div>
+    <div class="ov" id="ctl">
+      <button class="hb" id="ctlBtn" aria-expanded="true" aria-controls="ctlBody">Controls <small id="ctlSum"></small><span class="car">&#9662;</span></button>
+      <div id="ctlBody" class="pb"></div>
+    </div>
+    <div class="ov" id="set">
+      <button class="hb" id="setBtn" aria-expanded="false" aria-controls="setBody">Settings <small>colours, sizes, basemap</small><span class="car">&#9662;</span></button>
+      <div id="setBody" class="pb" hidden></div>
+    </div>
+    <div id="rkGrip" class="grip hz" role="separator" aria-orientation="horizontal" aria-label="Drag to resize the ranking list (double-click to reset)" tabindex="0" hidden><i></i></div>
+    <aside class="ov" id="sc" hidden aria-label="Ranked destinations"></aside>
+  </div>
+
+  <div class="ov" id="lg"><button class="hb" id="lgBtn" aria-expanded="false" aria-controls="lgBody"><span>Legend</span><span class="car">&#9662;</span></button><div id="lgBody" hidden></div></div>
+
+  <section class="ov" id="lp" hidden aria-label="Passenger load along a line">
+    <button class="hb" id="lpBtn" aria-expanded="false" aria-controls="lpBody"><span>Load along a line <small>passengers per train between stations</small></span><span class="car">&#9662;</span></button>
+    <div id="lpBody" hidden></div>
+  </section>
+
+  <section class="ov" id="pv" hidden aria-live="polite">
+    <div id="pvBar" class="bar"></div>
+    <div id="pvBody"></div>
+  </section>
+
+  <div id="cred"><span id="credTxt"></span><span id="scale" aria-label="Map scale"></span><button id="infoBtn" aria-label="Data, method and credits" aria-expanded="false" aria-controls="info">i</button></div>
+  <aside class="ov" id="info" hidden aria-label="Data, method and credits"></aside>
+  <div id="tip" hidden></div>
+  <div id="err" hidden></div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="data/od-network.js"></script>
+<script src="data/od-lines.js"></script>
+<script src="data/od-manifest.js"></script>
+<script src="data/od-load.js"></script>
+<script src="js/core.js"></script>
+<script src="js/map.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

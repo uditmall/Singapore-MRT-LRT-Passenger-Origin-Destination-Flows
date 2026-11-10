@@ -1,0 +1,21 @@
+Third-party data and notices
+
+The MIT licence in LICENSE covers the code in this repository only. The data below stays under its own licence.
+
+1. LTA DataMall
+   - Passenger Volume by Origin Destination Train Stations
+   - GTFS Schedule (Train), accessed 15 October 2026
+   Contains information from LTA DataMall, made available under the Singapore Open Data Licence version 1.0:
+   https://datamall.lta.gov.sg/content/datamall/en/SingaporeOpenDataLicence.html
+
+2. Urban Redevelopment Authority (URA), via data.gov.sg
+   Master Plan 2019 Rail Line layer, used to trace the rail lines.
+   Singapore Open Data Licence: https://data.gov.sg/open-data-licence
+
+3. OpenStreetMap
+   Basemap tiles (c) OpenStreetMap contributors, available under the Open Database Licence (ODbL):
+   https://www.openstreetmap.org/copyright
+   Humanitarian style by the Humanitarian OpenStreetMap Team, hosted by OpenStreetMap France.
+
+Station locations were compiled by the author with the help of Claude AI. Lines and stations are indicative only.
+This is an independent student project, not affiliated with or endorsed by LTA.
