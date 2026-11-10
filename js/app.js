@@ -107,7 +107,9 @@
   /* ---------- map drawing ---------- */
   let lineParts = [];
   function prepLines() {
-    lineParts = OD.lines.features.map(f => ({ colour: f.properties.colour, kind: f.properties.kind,
+    const NAME_CLS = [["North South", "NS"], ["East West", "EW"], ["North East", "NE"], ["Circle", "CC"], ["Downtown", "DT"], ["Thomson-East Coast", "TE"]];
+    const clsOf = f => f.properties.kind === "lrt" ? "LRT" : (NAME_CLS.find(n => f.properties.name.indexOf(n[0]) === 0) || [0, null])[1];
+    lineParts = OD.lines.features.map(f => ({ colour: f.properties.colour, kind: f.properties.kind, cls: clsOf(f),
       parts: f.geometry.type === "LineString" ? [f.geometry.coordinates] : f.geometry.coordinates }));
   }
   const colOutNow = () => S.colOut || css("--out"), colInNow = () => S.colIn || css("--in");
@@ -126,9 +128,12 @@
     if (S.view === "load") return drawLoad(ctx, m);
     {
       ctx.lineCap = "round"; ctx.lineJoin = "round";
-      lineParts.forEach(lp => {
-        ctx.strokeStyle = lp.colour; ctx.globalAlpha = lp.kind === "mrt" ? 0.6 : 0.5;
-        ctx.lineWidth = (lp.kind === "mrt" ? 3 : 1.8) * S.railScale;
+      const pick = S.line !== "all";   // a line chosen in the controls: its track is drawn strong, the others faint
+      const ordered = pick ? lineParts.slice().sort((x, y) => (x.cls === S.line) - (y.cls === S.line)) : lineParts;
+      ordered.forEach(lp => {
+        const on = pick && lp.cls === S.line;
+        ctx.strokeStyle = lp.colour; ctx.globalAlpha = on ? 1 : pick ? (lp.kind === "mrt" ? 0.22 : 0.18) : lp.kind === "mrt" ? 0.6 : 0.5;
+        ctx.lineWidth = (lp.kind === "mrt" ? 3 : 1.8) * S.railScale * (on ? 1.35 : 1);
         lp.parts.forEach(part => {
           ctx.beginPath();
           part.forEach((c, i) => { const p = m.project(c[1], c[0]); i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); });
@@ -156,7 +161,7 @@
       for (let i = 0; i < N; i++) {
         if (inTop.has(i) || i === S.station) continue;
         ctx.beginPath(); ctx.arc(P[i][0], P[i][1], 3.2 * S.dotScale, 0, 6.2832);
-        ctx.fillStyle = css("--muted"); ctx.globalAlpha = 0.55; ctx.fill(); ctx.globalAlpha = 1;
+        ctx.fillStyle = css("--ink2"); ctx.globalAlpha = S.line !== "all" && ST[i].lines.indexOf(S.line) < 0 ? 0.25 : 0.78; ctx.fill(); ctx.globalAlpha = 1;
         hits.push({ i, x: P[i][0], y: P[i][1], r: 3.2 * S.dotScale });
       }
       for (let k = F.top.length - 1; k >= 0; k--) {
@@ -282,7 +287,7 @@
     stations.forEach(i => stSel.append(h("option", { value: i, selected: i === S.station }, ST[i].name + " (" + ST[i].code + ")")));
     stSel.onchange = () => { S.station = stSel.value === "" ? null : +stSel.value; refreshFlow(false); };
     box.append(
-      h("div", { class: "two" }, gMonth(after), gSel("Line (filters the station list)", lineOpts(), () => S.line, v => { S.line = v; buildFlowControls(); })),
+      h("div", { class: "two" }, gMonth(after), gSel("Line (filters the station list)", lineOpts(), () => S.line, v => { S.line = v; buildFlowControls(); map && map.requestRender(); })),
       gDay(after), gHours(after),
       gSeg("Direction", [["out", "Leaving the station"], ["in", "Arriving at the station"]], () => S.dir, v => { S.dir = v; after(); }, true),
       group("Station (or click one on the map)", h("div", { class: "row2" }, stSel)),
@@ -378,6 +383,7 @@
     S.listH = clamp(Math.round(hpx), 110, Math.max(140, rt.parentElement.clientHeight - 160));
     sc.style.flex = "0 0 " + S.listH + "px";
   }
+  const gripsHidden = v => { $("#rkGrip").hidden = v; $("#rkGrip2").hidden = v; };   // top and bottom handle of the list
   function resetLayout() { setPanelW(null); setListH(null); savePrefs(); }
   function grip(el, onDrag, onKey, onReset, saveIt) {
     let start = null;
@@ -396,6 +402,9 @@
       () => setPanelW(null));
     grip(g2, (dx, dy, first) => { if (first) { h0 = $("#sc").getBoundingClientRect().height; } else setListH(h0 - dy); },
       k => { const hh0 = $("#sc").getBoundingClientRect().height; if (k === "ArrowUp") setListH(hh0 + 30); else if (k === "ArrowDown") setListH(hh0 - 30); else return false; return true; },
+      () => setListH(null));
+    grip($("#rkGrip2"), (dx, dy, first) => { if (first) { h0 = $("#sc").getBoundingClientRect().height; } else setListH(h0 + dy); },
+      k => { const hh0 = $("#sc").getBoundingClientRect().height; if (k === "ArrowDown") setListH(hh0 + 30); else if (k === "ArrowUp") setListH(hh0 - 30); else return false; return true; },
       () => setListH(null));
     if (S.panelW) setPanelW(S.panelW);
     if (S.listH) setListH(S.listH);
@@ -432,8 +441,8 @@
   function renderRank() {
     const sc = $("#sc");
     if (S.view === "load") return renderLoadRank();
-    if (S.view !== "flow" || S.station == null || !F || F.mode !== "flow") { sc.hidden = true; $("#rkGrip").hidden = true; return; }
-    sc.hidden = false; $("#rkGrip").hidden = false; sc.replaceChildren(); sc.classList.remove("min"); sc.style.flex = S.listH ? "0 0 " + S.listH + "px" : "";
+    if (S.view !== "flow" || S.station == null || !F || F.mode !== "flow") { sc.hidden = true; gripsHidden(true); return; }
+    sc.hidden = false; gripsHidden(false); sc.replaceChildren(); sc.classList.remove("min"); sc.style.flex = S.listH ? "0 0 " + S.listH + "px" : "";
     const s = ST[S.station], col = dirColour();
     sc.append(h("div", { class: "rkh" }, h("h2", null, (S.dir === "out" ? "Trips leaving " : "Trips arriving at ") + s.name),
       h("button", { class: "btn", type: "button", "aria-label": "Clear selection", onclick: () => selectStation(null) }, "Clear")),
@@ -933,14 +942,14 @@
   }
   function renderLoadRank() {
     const sc = $("#sc");
-    if (S.view !== "load" || !LD) { sc.hidden = true; $("#rkGrip").hidden = true; return; }
-    sc.hidden = false; $("#rkGrip").hidden = false; sc.replaceChildren();
+    if (S.view !== "load" || !LD) { sc.hidden = true; gripsHidden(true); return; }
+    sc.hidden = false; gripsHidden(false); sc.replaceChildren();
     const C = loadCalc(), col = colOutNow();
     let ids = []; for (let s = 0; s < LD.segs.length; s++) if (segActive(s) && C.load[s] > 0) ids.push(s);
     ids.sort((a, b) => C.load[b] - C.load[a] || a - b);
     const total = ids.length; if (S.ldTop !== "all") ids = ids.slice(0, S.ldTop);
     const open = S.ldRankOpen;
-    sc.classList.toggle("min", !open); sc.style.flex = open ? (S.listH ? "0 0 " + S.listH + "px" : "") : "0 0 auto"; $("#rkGrip").hidden = !open;
+    sc.classList.toggle("min", !open); sc.style.flex = open ? (S.listH ? "0 0 " + S.listH + "px" : "") : "0 0 auto"; gripsHidden(!open);
     sc.append(h("div", { class: "rkh ldh" }, h("h2", null, "Busiest segments"),
       h("span", { class: "rkb" },
         S.ldSel != null ? h("button", { class: "btn", type: "button", "aria-label": "Clear the selected segment and zoom out", onclick: clearLoadSel }, "Clear") : null,
@@ -1029,7 +1038,7 @@
     hideTip();
     if (flow) { buildFlowControls(); map.resize(); renderRank(); }
     else if (ld) { buildLoadControls(); map.resize(); renderLoadAll(); }
-    else { $("#sc").hidden = true; $("#rkGrip").hidden = true; buildBar(v); renderBody(); }
+    else { $("#sc").hidden = true; gripsHidden(true); buildBar(v); renderBody(); }
     updateSummary();
     if (map && lastBase !== baseKey()) applyBasemap();
   }
