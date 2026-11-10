@@ -1,6 +1,6 @@
 # Singapore MRT & LRT origin-destination flows
 
-Interactive dashboard of trips between MRT and LRT stations, from LTA DataMall (*Passenger Volume by Origin Destination Train Stations*). Months included: July, August and September 2026 (September opens first).
+Interactive dashboard of trips between MRT and LRT stations, from LTA DataMall (*Passenger Volume by Origin Destination Train Stations*). Months included: July to October 2026 (October opens first).
 The code is MIT licensed; the data it shows is not. See [NOTICE](NOTICE) for the data licences (LTA, URA, OpenStreetMap).
 Five views: **OD flow map**, **Passenger load between stations**, **Top corridors**, **Line to line**, **Weekday vs weekend**. Plain HTML, CSS and JavaScript, no build step and no API key.
 
