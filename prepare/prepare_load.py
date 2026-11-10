@@ -18,7 +18,7 @@ GT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "gtfs")
 PEN = 4
 # Saturdays and Sundays/public holidays in each month (weekend/holiday days = their sum); needed to blend the
 # GTFS Saturday and Sunday/PH timetables. Months not listed are weighted equally.
-WEEKEND_MIX = {"2026-07": [4, 4], "2026-08": [5, 6], "2026-09": [4, 4]}
+WEEKEND_MIX = {"2026-07": [4, 4], "2026-08": [5, 6], "2026-09": [4, 4], "2026-10": [5, 4]}
 
 s = open(os.path.join(HERE, "..", "data", "od-network.js")).read()
 net = json.loads(s[s.index("Object.assign(OD,") + 17:s.rindex(")")])
